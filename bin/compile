@@ -1,4 +1,38 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir>
 
-echo "-----> Nothing to do."
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+UI_DIR="$BUILD_DIR/ui"
+PROD_DIR="$UI_DIR/dist/dataviz"
+STATIC_FILES_DIR="$BUILD_DIR/backend/core/static"
+INDEX_FILE_DIR="$BUILD_DIR/backend/numerical/templates"
+
+echo "-----> Installing Angular CLI.."
+
+cd "$UI_DIR" && npm install @angular/cli;
+
+echo "-----> Downloading Angular App dependencies.."
+
+npm run;
+
+echo "-----> Building Angular App.."
+
+ng build --prod;
+
+echo "-----> Removing old static contents.."
+
+rm -rf "$STATIC_FILES_DIR/*"
+
+echo "-----> Copying files into Django App.."
+
+mv "$PROD_DIR/index.html" "$INDEX_FILE_DIR";
+
+mv "$PROD_DIR/*" "$STATIC_FILES_DIR/"
+
+echo "-----> Replacing index file links with static files ones.."
+
+python "$BUILD_DIR/python_script.py" "$INDEX_FILE_DIR/index.html"
+
+echo "-----> Done."
